@@ -1,0 +1,25 @@
+doctype html
+html
+    head
+        title= `File${files.length > 1 ? 's' : ''} Link${files.length > 1 ? 's' : ''} - Scotow`
+        meta(name='viewport' content='width=device-width, initial-scale=1.0')
+        link(rel='stylesheet' href='https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css')
+        link(rel='stylesheet' href='css/link/style.css')
+        script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+        script(src='js/link/clipboard.min.js')
+        script(src='js/link/app.min.js')
+    body
+        .files
+            .ready-label= `Your file${files.length > 1 ? 's are' : ' is'} ready`
+            each file in files
+                if file.status === 'success'
+                    .file.link.hint--top.hint--bounce(aria-label=file.info.name)
+                        input(id='f-' + file.alias.short type='text' readonly value=file.link.short)
+                        button.copy(data-clipboard-target='#f-' + file.alias.short) Copy
+                else
+                    .file.error= file.message
+            if archive
+                .separator Archive
+                .file.link.hint--top.hint--bounce(aria-label=archive.info.name)
+                    input(id='a-' + archive.alias.short type='text' readonly value=archive.link.short)
+                    button.copy(data-clipboard-target='#a-' + archive.alias.short) Copy
