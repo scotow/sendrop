@@ -1,0 +1,190 @@
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
+
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    color: white;
+    font-family: 'Source Sans Pro', sans-serif;
+    background: #131313;
+}
+
+body::before {
+    content: '';
+    width: 100%;
+    height: 4px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #15b154;
+}
+
+body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100% - 32px);
+    height: calc(100% - 36px);
+    margin: 14px 10px 10px 10px;
+    opacity: 0;
+    border: 6px dashed #15b154;
+    z-index: -1;
+    transition: opacity 250ms;
+}
+
+body.dragging::after {
+    opacity: 1;
+}
+
+body.dragging .option {
+    opacity: 0;
+}
+
+form {
+    text-align: center;
+}
+
+.icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 115px;
+    height: 115px;
+    margin: 0 auto;
+    background: #15b154;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 250ms background;
+}
+
+.icon.floating {
+    animation: float 1000ms infinite alternate;
+}
+
+@keyframes float {
+    100% {
+        transform: translateY(-8px);
+    }
+}
+
+.icon.uploading {
+    background: #ffc61d;
+}
+
+.icon.error {
+    background: #ff5d24;
+}
+
+figure {
+    width: 55px;
+    height: 55px;
+    margin: 0;
+    background: url(../../images/outbox.svg) no-repeat;
+}
+
+input[type=file] {
+    display: none;
+}
+
+#file-name {
+    margin-top: 15px;
+    font-size: 24px;
+    text-align: center;
+}
+
+
+/* Options */
+
+.option {
+    position: absolute;
+    top: 14px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: 2px;
+
+    transition: background 250ms linear;
+}
+
+.option:hover {
+    background: #2b2b2b;
+}
+
+.option > .title {
+    margin-right: 10px;
+    font-size: 12px;
+    color: lightgray;
+    opacity: 0;
+
+    transition: opacity 250ms;
+}
+
+.option:hover > .title {
+    opacity: 1;
+}
+
+.option > input[type=checkbox] {
+    display: none;
+}
+
+.option > label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    opacity: 0.3;
+    background: #252525;
+    border: 1px solid gray;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: opacity 300ms;
+}
+
+.option > input[type=checkbox]:checked + label::before {
+    transform: scale(0.80);
+}
+
+.option > label::before {
+    content: '';
+    background: #15b154;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transition: transform 250ms;
+    transform: scale(0);
+}
+
+.option > label:hover {
+    opacity: 0.8;
+}
+
+
+input[type=submit] {
+    display: block;
+    margin: 22px auto;
+    padding: 6px 18px;
+    font-size: 22px;
+    color: white;
+    background: #15b154;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 250ms transform;
+}
+
+input[type=submit]:hover {
+    transform: translateY(-2px);
+}
+
+input[type=submit].hidden {
+    display: none;
+}
