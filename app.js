@@ -36,8 +36,8 @@ app.set('view engine', 'pug');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get(/^\/(?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2}))*$/, (req, res) => {
-    const filePromises = req.path.slice(1).split('+').map(file => {
+app.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2}))*)$/, (req, res) => {
+    const filePromises = req.params[0].split('+').map(file => {
         if(ALIAS_REGEX.short.test(file)) {
             return database.getFile('short', file).then(checkFileExists);
         } else if(ALIAS_REGEX.long.test(file)) {
@@ -64,6 +64,32 @@ app.get(/^\/(?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]+
             default:
                 sendArchive(res, files);
                 break;
+        }
+    })
+    .catch(error => res.status(404).json(buildError(error.message)));
+});
+
+app.get(/^\/(?:a|archives?)\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
+    const archiveAlias = req.params[0];
+    let archivePromise;
+    if(ALIAS_REGEX.short.test(archiveAlias)) {
+        archivePromise = database.getArchiveFiles('short', archiveAlias);
+    } else if(ALIAS_REGEX.long.test(file)) {
+        archivePromise = database.getArchiveFiles('long', archiveAlias);
+    } else {
+        archivePromise = Promise.reject(new Error('Invalid file alias.'));
+    }
+
+    archivePromise
+    .then(files => {
+        return Promise.all(files.map(file => checkFileExists(file).catch(() => null)))
+    })
+    .then(files => {
+        const existingFiles = files.filter(Boolean);
+        if(existingFiles.length) {
+            sendArchive(res, existingFiles);
+        } else {
+            res.status(404).json(buildError('All files of this archive have expired.'));
         }
     })
     .catch(error => res.status(404).json(buildError(error.message)));
