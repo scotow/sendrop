@@ -37,13 +37,13 @@ app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get(/^\/(?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2}))*$/, (req, res) => {
-    const filePromises = req.url.slice(1).split('+').map(file => {
+    const filePromises = req.path.slice(1).split('+').map(file => {
         if(ALIAS_REGEX.short.test(file)) {
-            return database.getFile('short', file).then((file) => checkFileExists(file));
+            return database.getFile('short', file).then(checkFileExists);
         } else if(ALIAS_REGEX.long.test(file)) {
-            return database.getFile('long', file).then((file) => checkFileExists(file));
+            return database.getFile('long', file).then(checkFileExists);
         } else {
-            return Promise.reject(new Error('A file or more wasn\'t found or have expired.'));
+            return Promise.reject(new Error('Invalid file alias.'));
         }
     });
 
@@ -54,25 +54,34 @@ app.get(/^\/(?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]+
                 res.status(404).json(buildError('An error has occured while fetching your file(s).'));
                 break;
             case 1:
-                const file = files[0];
-                res.download(file.path, file.name);
+                if(booleanParamater(req.query.zip) || booleanParamater(req.query.archive)) {
+                    sendArchive(res, files);
+                } else {
+                    const file = files[0];
+                    res.download(file.path, file.name);
+                }
                 break;
             default:
-                archive.createZip(files)
-                .then(archivePath => {
-                    res.download(archivePath, 'files.zip', error => {
-                        fs.unlink(archivePath, error => error && console.error('Error while unlinking archive file.', error, archivePath));
-                    });
-                })
-                .catch(error => {
-                    console.error(error);
-                    res.status(404).json(buildError(error.message));
-                });
+                sendArchive(res, files);
                 break;
         }
     })
     .catch(error => res.status(404).json(buildError(error.message)));
 });
+
+function sendArchive(res, files) {
+    archive.createZip(files)
+    .then(archivePath => {
+        res.download(archivePath, 'files.zip', error => {
+            error && console.error('Error while uploading archive.', error, archivePath);
+            fs.unlink(archivePath, error => error && console.error('Error while unlinking archive file.', error, archivePath));
+        });
+    })
+    .catch(error => {
+        console.error(error);
+        res.status(404).json(buildError(error.message));
+    });
+}
 
 app.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
     console.log('Downloading.');
@@ -87,8 +96,8 @@ app.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
             handleFiles(req, res);
             console.log('Downloaded.');
         } else if(req.body.drop) {
-            if(isPretty(req.body.pretty)) {
-                res.render('link', { files: JSON.parse(req.body.drop) });
+            if(booleanParamater(req.body.pretty)) {
+                res.render('link', JSON.parse(req.body.drop));
             } else {
                 res.type('json').send(req.body.drop);
             }
@@ -119,12 +128,16 @@ async function handleFiles(req, res) {
         return;
     }
 
-    console.log(files);
     files = await Promise.all(files.map(file => handleFile(file, req.ip)));
-    if(isPretty(req.body.pretty)) {
-        res.render('link', { files: files });
+    const data = {files: files};
+    const validFiles = files.filter(file => file.status === 'success');
+    if(validFiles.length > 1) {
+        data.archive = await handleArchive(validFiles, req.ip);
+    }
+    if(booleanParamater(req.body.pretty)) {
+        res.render('link', data);
     } else {
-        res.json(files);
+        res.json(data);
     }
 }
 
@@ -136,6 +149,7 @@ async function handleFile(file, ip) {
         const expire = moment().add(1, 'days');
         return {
             status: 'success',
+            id: id,
             info: {
                 name: file.originalname,
                 size: {
@@ -157,6 +171,34 @@ async function handleFile(file, ip) {
                 long: `${SITE_ADDRESS}/${longAlias}`
             }
         };
+    } catch(error) {
+        return buildError(error.message);
+    }
+}
+
+async function handleArchive(files, ip) {
+    try {
+        const size = files.reduce((acc, cur) => acc + cur.info.size.bytes, 0);
+        const [shortAlias, longAlias] = await Promise.all([database.generateAlias('archives', 'short'), database.generateAlias('archives', 'long')]);
+        const id = await database.insertArchive(ip, size, shortAlias, longAlias);
+        await Promise.all(files.map(file => database.addFileToArchive(id, file.id)));
+        return {
+            status: 'success',
+            info: {
+                size: {
+                    bytes: size,
+                    readable: formatBytes(size)
+                }
+            },
+            alias: {
+                short: shortAlias,
+                long: longAlias
+            },
+            link: {
+                short: `${SITE_ADDRESS}/a/${shortAlias}`,
+                long: `${SITE_ADDRESS}/a/${longAlias}`
+            }
+        }
     } catch(error) {
         return buildError(error.message);
     }
@@ -199,9 +241,9 @@ function checkFileExists(file) {
     });
 }
 
-function isPretty(pretty) {
-    if(!pretty) return false;
-    const numberValue = Number(pretty);
+function booleanParamater(value) {
+    if(!value) return false;
+    const numberValue = Number(value);
     if(isNaN(numberValue)) return true;
     return !!numberValue;
 }
