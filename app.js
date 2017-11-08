@@ -7,6 +7,8 @@ const database = require('./lib/database.js');
 
 // Utils.
 const moment = require('moment');
+const bytes = require('bytes');
+const disk = require('./lib/disk.js');
 const archive = require('./lib/archive.js');
 // const file = require('./lib/file.js');
 
@@ -58,7 +60,11 @@ app.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]
                     sendArchive(res, files);
                 } else {
                     const file = files[0];
-                    res.download(file.path, file.name);
+                    if(file.type && (booleanParamater(req.query.display) || booleanParamater(req.query.d))) {
+                        res.sendFile(file.path, { headers: { 'Content-Type': 'image/png', 'Content-Disposition': `inline; filename="helloworld.png"` } });
+                    } else {
+                        res.download(file.path, file.name);
+                    }
                 }
                 break;
             default:
@@ -154,12 +160,33 @@ async function handleFiles(req, res) {
         return;
     }
 
-    files = await Promise.all(files.map(file => handleFile(file, req.ip)));
+    if(await disk.freespace() < bytes('1GB')) {
+        res.json(buildError('Server disk is full.'));
+        return;
+    }
+
+    const usage = await database.getUsage(req.ip);
+    const quota = bytes('1GB');
+    const filesToHandle = [];
+    const unhandledFiles = [];
+    for(let i = 0; i < files.length; i++) {
+        if(usage.count + i + 1 < 32 && usage.size + file.size < quota) {
+            filesToHandle.push(files[i]);
+            usage.count += 1; usage.size += file.size;
+        } else {
+            const fileError = buildError('You have exceeded your daily quota.');
+            fileError.name = files[i].name;
+            unhandledFiles.push(fileError);
+        }
+    }
+
+    files = (await Promise.all(filesToHandle.map(file => handleFile(file, req.ip)))).concat(unhandledFiles);
     const data = {files: files};
     const validFiles = files.filter(file => file.status === 'success');
     if(validFiles.length > 1) {
         data.archive = await handleArchive(validFiles, req.ip);
     }
+    validFiles.forEach(file => delete file.id);
     if(booleanParamater(req.body.pretty)) {
         res.render('link', data);
     } else {
@@ -170,7 +197,7 @@ async function handleFiles(req, res) {
 async function handleFile(file, ip) {
     try {
         const [shortAlias, longAlias] = await Promise.all([database.generateAlias('files', 'short'), database.generateAlias('files', 'long')]);
-        const id = await database.insertFile(ip, file.originalname, file.size, shortAlias, longAlias);
+        const id = await database.insertFile(ip, file.originalname, file.size, file.mimetype, shortAlias, longAlias);
         await moveToUpload(file.path, id);
         const expire = moment().add(1, 'days');
         return {
@@ -180,7 +207,7 @@ async function handleFile(file, ip) {
                 name: file.originalname,
                 size: {
                     bytes: file.size,
-                    readable: formatBytes(file.size)
+                    readable: bytes(file.size)
                 }
             },
             expire: {
@@ -213,7 +240,7 @@ async function handleArchive(files, ip) {
             info: {
                 size: {
                     bytes: size,
-                    readable: formatBytes(size)
+                    readable: bytes(size)
                 }
             },
             alias: {
@@ -244,7 +271,7 @@ function moveToUpload(filePath, id) {
     return new Promise((resolve, reject) => {
         fs.rename(filePath, `uploads/${id}`, error => {
             if(error) {
-                reject('Impossible to move the uploaded file.');
+                reject(new Error('Impossible to move the uploaded file.'));
                 return;
             }
             resolve();
@@ -272,15 +299,6 @@ function booleanParamater(value) {
     const numberValue = Number(value);
     if(isNaN(numberValue)) return true;
     return !!numberValue;
-}
-
-function formatBytes(bytes, decimals) {
-    if(bytes == 0) return '0 Bytes';
-    const k = 1024,
-    dm = decimals || 2,
-    sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
-    i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 database.connect()

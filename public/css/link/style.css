@@ -50,7 +50,6 @@ body::before {
 .link {
     border: 1px solid #15b154;
     border-radius: 4px;
-    overflow: hidden;
 }
 
 /* Hint.css */
@@ -106,6 +105,7 @@ input {
     border: none;
     font-size: 22px;
     font-family: 'Source Sans Pro', sans-serif;
+    border-radius: 4px;
     outline: none;
     transition: border-color 250ms;
 }
@@ -114,18 +114,31 @@ input.copied {
     border-color: #1be76d;
 }
 
-.copy {
-    margin: 0;
-    padding: 5px 12px 5px 12px;
-    color: white;
-    background: #15b154;
+.action {
+    width: 42px;
     border: none;
-    font-size: 22px;
+    background-color: #15b154;
+    background-size: 65%;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-size: 16px;
     font-family: 'Source Sans Pro', sans-serif;
     cursor: pointer;
-    transition: background 250ms;
+    transition: background-color 250ms;
 }
 
-.copy.copied {
-    background: #1be76d;
+.action:hover {
+    background-color: #18cc61;
+}
+
+.action.triggered {
+    background-color: #1be76d;
+}
+
+.download {
+    background-image: url('/images/download.svg');
+}
+
+.copy {
+    background-image: url('/images/copy.svg');
 }
