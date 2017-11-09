@@ -32,7 +32,7 @@ const uploadMidleware =
     ]);
 
 // Setup.
-const SITE_ADDRESS = 'https://dev.file.scotow.com';
+const SITE_ADDRESS = 'https://file.scotow.com';
 const PORT = process.env.PORT || 5003;
 
 const app = express();
