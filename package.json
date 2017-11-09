@@ -1,5 +1,5 @@
 {
-  "name": "sandhost",
+  "name": "sandrop",
   "version": "1.0.0",
   "description": "Upload temporary files.",
   "main": "app.js",
@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-      "sanddrop": "./app.js"
+      "sandrop": "./app.js"
   },
   "repository": {
     "type": "git",
