@@ -12,7 +12,6 @@ $(function() {
     // Cookie.
     var prettyCookie = Cookies.get('pretty');
     var pretty = prettyCookie === undefined ? 1 : parseInt(prettyCookie);
-    console.log(pretty);
     $pretty.prop('checked', pretty).change(function() {
         pretty = this.checked ? 1 : 0;
         Cookies.set('pretty', pretty, {expires: 365});
