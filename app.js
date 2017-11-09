@@ -19,15 +19,21 @@ const multer  = require('multer');
 
 // Express midlewares.
 const staticPublic = express.static(path.join(__dirname, 'public'));
-const uploadMidleware = multer({ dest: 'uploads/' }).fields([
-    { name: 'file', maxCount: 1 },
-    { name: 'files', maxCount: 32}
-]);
+const uploadMidleware =
+    multer({
+        dest: 'uploads/',
+        limits: {
+            fieldNameSize: 100
+        }
+    })
+    .fields([
+        { name: 'file', maxCount: 1 },
+        { name: 'files', maxCount: 32}
+    ]);
 
 // Setup.
 const SITE_ADDRESS = 'https://dev.file.scotow.com';
 const PORT = process.env.PORT || 5003;
-const ALIAS_REGEX = {short: /^[a-zA-Z0-9]{6}$/, long: /^[a-z]+(-[a-z]+){2}$/};
 
 const app = express();
 app.set('trust proxy', true);
@@ -39,17 +45,7 @@ app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2}))*)$/, (req, res) => {
-    const filePromises = req.params[0].split('+').map(file => {
-        if(ALIAS_REGEX.short.test(file)) {
-            return database.getFile('short', file).then(checkFileExists);
-        } else if(ALIAS_REGEX.long.test(file)) {
-            return database.getFile('long', file).then(checkFileExists);
-        } else {
-            return Promise.reject(new Error('Invalid file alias.'));
-        }
-    });
-
-    Promise.all(filePromises)
+    Promise.all(req.params[0].split('+').map(alias => database.getFile(alias).then(checkFileExists)))
     .then(files => {
         switch(files.length) {
             case 0:
@@ -61,7 +57,7 @@ app.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]
                 } else {
                     const file = files[0];
                     if(file.type && (booleanParamater(req.query.display) || booleanParamater(req.query.d))) {
-                        res.sendFile(file.path, { headers: { 'Content-Type': 'image/png', 'Content-Disposition': `inline; filename="helloworld.png"` } });
+                        res.sendFile(file.path, { headers: { 'Content-Type': file.type, 'Content-Disposition': `inline; filename="helloworld.png"` } });
                     } else {
                         res.download(file.path, file.name);
                     }
@@ -76,20 +72,8 @@ app.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]
 });
 
 app.get(/^\/(?:a|archives?)\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
-    const archiveAlias = req.params[0];
-    let archivePromise;
-    if(ALIAS_REGEX.short.test(archiveAlias)) {
-        archivePromise = database.getArchiveFiles('short', archiveAlias);
-    } else if(ALIAS_REGEX.long.test(file)) {
-        archivePromise = database.getArchiveFiles('long', archiveAlias);
-    } else {
-        archivePromise = Promise.reject(new Error('Invalid file alias.'));
-    }
-
-    archivePromise
-    .then(files => {
-        return Promise.all(files.map(file => checkFileExists(file).catch(() => null)))
-    })
+    database.getArchiveFiles(req.params[0])
+    .then(files => Promise.all(files.map(file => checkFileExists(file).catch(() => null))))
     .then(files => {
         const existingFiles = files.filter(Boolean);
         if(existingFiles.length) {
@@ -116,17 +100,17 @@ function sendArchive(res, files) {
 }
 
 app.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
-    console.log('Downloading.');
+    // console.log('Downloading.');
     uploadMidleware(req, res, (error) => {
         if(error) {
-            console.log('Download error.');
-            res.status(400).json(buildError('Upload error.'));
+            // console.log('Download error.');
+            sendData(req, res, buildError('Invalid files submission.'), 400);
             return;
         }
 
         if(req.files) {
             handleFiles(req, res);
-            console.log('Downloaded.');
+            // console.log('Downloaded.');
         } else if(req.body.drop) {
             if(booleanParamater(req.body.pretty)) {
                 res.render('link', JSON.parse(req.body.drop));
@@ -134,51 +118,52 @@ app.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
                 res.type('json').send(req.body.drop);
             }
         } else {
-            res.sendStatus(404);
+            sendData(req, res, buildError('Invalid request.'), 404);
         }
     });
 });
 
 async function handleFiles(req, res) {
     if(!req.ip) {
-        res.status(400).json(buildError('Invalid IP address.'));
+        sendData(req, res, buildError('Invalid IP address.'), 400);
         return;
     }
     const filesForm = req.files;
     if(filesForm.files && filesForm.file) {
-        res.status(400).json(buildError('Invalid files form.'));
+        sendData(req, res, buildError('Invalid files form.'), 400);
         return;
     }
 
-    let files;
+    let files, singleFile;
     if(filesForm.file) {
         files = filesForm.file;
+        singleFile = true;
     } else if(filesForm.files) {
         files = filesForm.files;
     } else {
-        res.status(400).json(buildError('Invalid files form.'));
+        sendData(req, res, buildError('Invalid files form.'), 400);
         return;
     }
 
     if(await disk.freespace() < bytes('1GB')) {
-        res.json(buildError('Server disk is full.'));
+        sendData(req, res, buildError('Server disk is full.'), 503);
         return;
     }
 
     const usage = await database.getUsage(req.ip);
-    const quota = bytes('1GB');
+    const quota = { count: 127, size: bytes('1GB') };
     const filesToHandle = [];
     const unhandledFiles = [];
-    for(let i = 0; i < files.length; i++) {
-        if(usage.count + i + 1 < 32 && usage.size + file.size < quota) {
-            filesToHandle.push(files[i]);
+    files.forEach((file, index) => {
+        if(usage.count + index + 1 < quota.count && usage.size + file.size < quota.size) {
+            filesToHandle.push(file);
             usage.count += 1; usage.size += file.size;
         } else {
             const fileError = buildError('You have exceeded your daily quota.');
-            fileError.name = files[i].name;
+            fileError.name = file.name;
             unhandledFiles.push(fileError);
         }
-    }
+    });
 
     files = (await Promise.all(filesToHandle.map(file => handleFile(file, req.ip)))).concat(unhandledFiles);
     const data = {files: files};
@@ -188,9 +173,9 @@ async function handleFiles(req, res) {
     }
     validFiles.forEach(file => delete file.id);
     if(booleanParamater(req.body.pretty)) {
-        res.render('link', data);
+        res.render('links', data);
     } else {
-        res.json(data);
+        sendData(req, res, singleFile ? data.files[0] : data);
     }
 }
 
@@ -254,6 +239,17 @@ async function handleArchive(files, ip) {
         }
     } catch(error) {
         return buildError(error.message);
+    }
+}
+
+function sendData(req, res, data, statusCode) {
+    if(statusCode) res.status(statusCode);
+    if(booleanParamater(req.query.short || req.body.short) ||
+       booleanParamater(req.query.tiny || req.body.tiny) ||
+       booleanParamater(req.query.s || req.body.s)) {
+        res.send((data.files ? [...data.files, data.archive] : [data]).map(file => file.status === 'success' ? file.link.short : file.message).join('\n'));
+    } else {
+        res.json(data);
     }
 }
 
