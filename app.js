@@ -22,7 +22,7 @@ const multer  = require('multer');
 const staticPublic = express.static(path.join(__dirname, 'public'));
 const uploadMidleware =
     multer({
-        dest: 'uploads/',
+        dest: path.join(__dirname, 'uploads'),
         limits: {
             fieldNameSize: 100
         }
