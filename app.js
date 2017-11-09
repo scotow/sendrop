@@ -266,7 +266,7 @@ function moveToUpload(filePath, id) {
     if(!id) return Promise.reject(new Error('Invalid file id.'));
 
     return new Promise((resolve, reject) => {
-        fs.rename(filePath, `uploads/${id}`, error => {
+        fs.rename(filePath, path.join(__dirname, 'uploads', String(id)), error => {
             if(error) {
                 reject(new Error('Impossible to move the uploaded file.'));
                 return;
