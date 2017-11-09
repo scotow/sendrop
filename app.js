@@ -298,6 +298,7 @@ function booleanParamater(value) {
     return !!numberValue;
 }
 
+fs.existsSync(path.join(__dirname, 'uploads')) || fs.mkdirSync(path.join(__dirname, 'uploads'));
 database.connect()
 .then((connection) => {
     console.log(`Connected to mySQL server (${connection.threadId}).`);
