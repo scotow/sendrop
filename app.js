@@ -114,7 +114,7 @@ app.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
             // console.log('Downloaded.');
         } else if(req.body.drop) {
             if(booleanParamater(req.body.pretty)) {
-                res.render('link', JSON.parse(req.body.drop));
+                res.render('links', JSON.parse(req.body.drop));
             } else {
                 res.type('json').send(req.body.drop);
             }
