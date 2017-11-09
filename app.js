@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Basic modules.
 const path = require('path');
 const fs = require('fs');
@@ -10,7 +12,6 @@ const moment = require('moment');
 const bytes = require('bytes');
 const disk = require('./lib/disk.js');
 const archive = require('./lib/archive.js');
-// const file = require('./lib/file.js');
 
 // Web server.
 const express = require('express');
