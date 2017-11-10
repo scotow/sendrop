@@ -1,14 +1,29 @@
-// Imports.
-const utils = require('../lib/utils.js');
-const router = require('express').Router();
+// Setup.
+const SITE_ADDRESS = process.env.ADDR || (process.env.DEV ? 'https://dev.file.scotow.com' : 'https://file.scotow.com');
 
+// Imports.
+// Basic modules.
+const path = require('path');
+const fs = require('fs');
+
+// Utils.
+const utils = require('../lib/utils.js');
+const moment = require('moment');
+const bytes = require('bytes');
+const disk = require('../lib/disk.js');
+
+// Database.
+const database = require('../lib/database.js');
+
+// Express.
+const router = require('express').Router();
 const bodyParser = require('body-parser');
 const multer = require('multer');
 
 // Express midlewares.
 const uploadMidleware =
     multer({
-        dest: path.join(__dirname, 'uploads'),
+        dest: path.join(__dirname, '..', 'uploads'),
         limits: {
             fieldNameSize: 100
         }
@@ -20,37 +35,30 @@ const uploadMidleware =
 
 
 router.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
-    // console.log('Downloading.');
     uploadMidleware(req, res, (error) => {
         if(error) {
-            // console.log('Download error.');
-            utils.sendData(req, res, utils.buildError('Invalid files submission.'), 400);
+            utils.displayError(req, res, utils.buildError('Invalid files submission.'), 400);
             return;
         }
 
         if(req.files) {
             handleFiles(req, res);
-            // console.log('Downloaded.');
         } else if(req.body.drop) {
-            if(utils.booleanParamater(req.body.pretty)) {
-                res.render('links', JSON.parse(req.body.drop));
-            } else {
-                res.type('json').send(req.body.drop);
-            }
+            utils.displayData(req, res, JSON.parse(req.body.drop));
         } else {
-            utils.sendData(req, res, utils.buildError('Invalid request.'), 404);
+            utils.displayError(req, res, utils.buildError('Invalid request.'), 404);
         }
     });
 });
 
 async function handleFiles(req, res) {
     if(!req.ip) {
-        utils.sendData(req, res, utils.buildError('Invalid IP address.'), 400);
+        utils.displayError(req, res, utils.buildError('Invalid IP address.'), 400);
         return;
     }
     const filesForm = req.files;
     if(filesForm.files && filesForm.file) {
-        utils.sendData(req, res, utils.buildError('Invalid files form.'), 400);
+        utils.displayError(req, res, utils.buildError('Invalid files form.'), 400);
         return;
     }
 
@@ -61,12 +69,12 @@ async function handleFiles(req, res) {
     } else if(filesForm.files) {
         files = filesForm.files;
     } else {
-        utils.sendData(req, res, utils.buildError('Invalid files form.'), 400);
+        utils.displayError(req, res, utils.buildError('Invalid files form.'), 400);
         return;
     }
 
     if(await disk.freespace() < bytes('1GB')) {
-        utils.sendData(req, res, utils.buildError('Server disk is full.'), 503);
+        utils.displayError(req, res, utils.buildError('Server disk is full.'), 503);
         return;
     }
 
@@ -95,7 +103,7 @@ async function handleFiles(req, res) {
     if(utils.booleanParamater(req.body.pretty)) {
         res.render('links', data);
     } else {
-        utils.sendData(req, res, singleFile ? data.files[0] : data);
+        utils.displayData(req, res, singleFile ? data.files[0] : data, 200);
     }
 }
 
@@ -167,7 +175,7 @@ function moveToUpload(filePath, id) {
     if(!id) return Promise.reject(new Error('Invalid file id.'));
 
     return new Promise((resolve, reject) => {
-        fs.rename(filePath, path.join(__dirname, 'uploads', String(id)), error => {
+        fs.rename(filePath, path.join(__dirname, '..', 'uploads', String(id)), error => {
             if(error) {
                 reject(new Error('Impossible to move the uploaded file.'));
                 return;

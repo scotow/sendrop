@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+// Setup.
+const PORT = process.env.PORT || (process.env.DEV ? 5003 : 4003);
+
+// Imports.
 // Basic modules.
 const path = require('path');
 const fs = require('fs');
@@ -7,20 +11,12 @@ const fs = require('fs');
 // Database.
 const database = require('./lib/database.js');
 
-// Utils.
-const moment = require('moment');
-const bytes = require('bytes');
-const disk = require('./lib/disk.js');
-const archive = require('./lib/archive.js');
-
 // Web server.
 const express = require('express');
 const download = require('./routes/download.js');
 const upload = require('./routes/upload.js');
-
-// Setup.
-const SITE_ADDRESS = 'https://dev.file.scotow.com';
-const PORT = process.env.PORT || (process.env.DEV ? 5003 : 4003);
+const utils = require('./lib/utils.js');
+const error = require('./lib/error.js');
 
 const app = express();
 app.set('trust proxy', true);
@@ -33,6 +29,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', download);
 app.use('/', upload);
+
+app.all('*', (req, res) => {
+    utils.displayError(req, res, error.fromCode(404));
+});
 
 fs.existsSync(path.join(__dirname, 'uploads')) || fs.mkdirSync(path.join(__dirname, 'uploads'));
 database.connect()

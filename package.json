@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-      "sandrop": "./app.js"
+    "sandrop": "./app.js"
   },
   "repository": {
     "type": "git",
