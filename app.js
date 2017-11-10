@@ -15,8 +15,6 @@ const archive = require('./lib/archive.js');
 
 // Web server.
 const express = require('express');
-const bodyParser = require('body-parser');
-const multer = require('multer');
 const download = require('./routes/download.js');
 const upload = require('./routes/upload.js');
 

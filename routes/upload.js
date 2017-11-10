@@ -1,7 +1,10 @@
+const bodyParser = require('body-parser');
+const multer = require('multer');
+
 const utils = require('../lib/utils.js');
 const router = require('express').Router();
 
-app.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
+router.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
     // console.log('Downloading.');
     uploadMidleware(req, res, (error) => {
         if(error) {
