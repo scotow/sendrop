@@ -26,7 +26,7 @@ const uploadMidleware =
     multer({
         dest: path.join(os.tmpdir(), 'uploads'),
         limits: {
-            fieldNameSize: 100
+            fieldNameSize: 255
         }
     })
     .fields([
@@ -84,7 +84,7 @@ async function handleFiles(req, res) {
     const filesToHandle = [];
     const unhandledFiles = [];
     files.forEach((file, index) => {
-        if(usage.count + index + 1 < quota.count && usage.size + file.size < quota.size) {
+        if(usage.count + 1 < quota.count && usage.size + file.size < quota.size) {
             filesToHandle.push(file);
             usage.count += 1; usage.size += file.size;
         } else {
