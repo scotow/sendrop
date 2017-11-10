@@ -7,6 +7,7 @@ const PORT = process.env.PORT || (process.env.DEV ? 5003 : 4003);
 // Basic modules.
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 // Database.
 const database = require('./lib/database.js');
@@ -34,7 +35,7 @@ app.all('*', (req, res) => {
     utils.displayError(req, res, error.fromCode(404));
 });
 
-fs.existsSync(path.join(__dirname, 'uploads')) || fs.mkdirSync(path.join(__dirname, 'uploads'));
+fs.existsSync(path.join(os.tmpdir(), 'uploads')) || fs.mkdirSync(path.join(os.tmpdir(), 'uploads'));
 database.connect()
 .then((connection) => {
     console.log(`Connected to mySQL server (${connection.threadId}).`);

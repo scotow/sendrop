@@ -5,6 +5,7 @@ const SITE_ADDRESS = process.env.ADDR || (process.env.DEV ? 'https://dev.file.sc
 // Basic modules.
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 // Utils.
 const utils = require('../lib/utils.js');
@@ -23,7 +24,7 @@ const multer = require('multer');
 // Express midlewares.
 const uploadMidleware =
     multer({
-        dest: path.join(__dirname, '..', 'uploads'),
+        dest: path.join(os.tmpdir(), 'uploads'),
         limits: {
             fieldNameSize: 100
         }
@@ -175,7 +176,7 @@ function moveToUpload(filePath, id) {
     if(!id) return Promise.reject(new Error('Invalid file id.'));
 
     return new Promise((resolve, reject) => {
-        fs.rename(filePath, path.join(__dirname, '..', 'uploads', String(id)), error => {
+        fs.rename(filePath, path.join(os.tmpdir(), 'uploads', String(id)), error => {
             if(error) {
                 reject(new Error('Impossible to move the uploaded file.'));
                 return;

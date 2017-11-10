@@ -2,6 +2,7 @@
 // Basic modules.
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 // Utils.
 const utils = require('../lib/utils.js');
@@ -96,7 +97,7 @@ function checkFileExists(file) {
     if(!file.id) return Promise.reject(new Error('Invalid file id.'));
 
     return new Promise((resolve, reject) => {
-        file.path = path.join(__dirname, '..', 'uploads', String(file.id));
+        file.path = path.join(os.tmpdir(), 'uploads', String(file.id));
         fs.access(file.path, fs.constants.R_OK, error => {
             if(error) {
                 reject(new Error('File has expired.'));
