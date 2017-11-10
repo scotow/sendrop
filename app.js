@@ -58,7 +58,7 @@ app.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]
                 } else {
                     const file = files[0];
                     if(file.type && (booleanParamater(req.query.display) || booleanParamater(req.query.d))) {
-                        res.sendFile(file.path, { headers: { 'Content-Type': file.type, 'Content-Disposition': `inline; filename="helloworld.png"` } });
+                        res.sendFile(file.path, { headers: { 'Content-Type': file.type, 'Content-Disposition': `inline; filename="${file.name}"` } });
                     } else {
                         res.download(file.path, file.name);
                     }
