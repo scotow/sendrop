@@ -14,7 +14,7 @@ const database = require('../lib/database.js');
 // Express.
 const router = require('express').Router();
 
-router.get(/^\/(?:(a|d|f|g|i|t|v|z)\/)?([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
+router.get(/^\/(?:(a|archive|d|f|g|i|t|v|z)\/)?([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
     const shortcut = req.params[0];
     const alias = req.params[1];
     if(shortcut === 'a' || shortcut === 'archive') {
