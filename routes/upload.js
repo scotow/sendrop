@@ -1,8 +1,23 @@
+// Imports.
+const utils = require('../lib/utils.js');
+const router = require('express').Router();
+
 const bodyParser = require('body-parser');
 const multer = require('multer');
 
-const utils = require('../lib/utils.js');
-const router = require('express').Router();
+// Express midlewares.
+const uploadMidleware =
+    multer({
+        dest: path.join(__dirname, 'uploads'),
+        limits: {
+            fieldNameSize: 100
+        }
+    })
+    .fields([
+        { name: 'file', maxCount: 1 },
+        { name: 'files', maxCount: 32}
+    ]);
+
 
 router.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
     // console.log('Downloading.');

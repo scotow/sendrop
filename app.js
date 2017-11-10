@@ -18,20 +18,6 @@ const express = require('express');
 const download = require('./routes/download.js');
 const upload = require('./routes/upload.js');
 
-// Express midlewares.
-const staticPublic = express.static(path.join(__dirname, 'public'));
-const uploadMidleware =
-    multer({
-        dest: path.join(__dirname, 'uploads'),
-        limits: {
-            fieldNameSize: 100
-        }
-    })
-    .fields([
-        { name: 'file', maxCount: 1 },
-        { name: 'files', maxCount: 32}
-    ]);
-
 // Setup.
 const SITE_ADDRESS = 'https://dev.file.scotow.com';
 const PORT = process.env.PORT || (process.env.DEV ? 5003 : 4003);
