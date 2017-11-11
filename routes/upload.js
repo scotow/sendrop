@@ -111,7 +111,7 @@ async function handleFiles(req, res) {
 async function handleFile(file, ip) {
     try {
         const [shortAlias, longAlias, revokeToken] = await Promise.all([database.generateToken('files', 'short_alias'), database.generateToken('files', 'long_alias'), database.generateToken('files', 'revoke_token')]);
-        const id = await database.insertFile(ip, file.originalname, file.size, file.mimetype, shortAlias, longAlias);
+        const id = await database.insertFile(ip, file.originalname, file.size, file.mimetype, shortAlias, longAlias, revokeToken);
         await moveToUpload(file.path, id);
         const expire = moment().add(1, 'days');
         return {
