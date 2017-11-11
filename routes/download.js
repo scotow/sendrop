@@ -2,7 +2,6 @@
 // Basic modules.
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
 
 // Utils.
 const utils = require('../lib/utils.js');
@@ -21,11 +20,11 @@ router.get(/^\/(?:(a|archive|d|f|g|i|t|v|z)\/)?([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+)
         prepareArchive(res, alias);
     } else {
         database.getFile(alias)
-        .then(checkFileExists)
+        .then(utils.checkFileExists)
         .then(file => {
             let type;
             switch(shortcut) {
-                case 'f': case 'd':
+                case 'f':
                     type = file.type;
                     break;
                 case 't':
@@ -54,7 +53,7 @@ router.get(/^\/(?:(a|archive|d|f|g|i|t|v|z)\/)?([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+)
 });
 
 router.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2}))+)$/, (req, res) => {
-    Promise.all(req.params[0].split('+').map(alias => database.getFile(alias).then(checkFileExists)))
+    Promise.all(req.params[0].split('+').map(alias => database.getFile(alias).then(utils.checkFileExists)))
     .then(files => {
         if(files.length) {
             sendArchive(res, files);
@@ -67,7 +66,7 @@ router.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a
 
 function prepareArchive(res, alias) {
     database.getArchiveFiles(alias)
-    .then(files => Promise.all(files.map(file => checkFileExists(file).catch(() => null))))
+    .then(files => Promise.all(files.map(file => utils.checkFileExists(file).catch(() => null))))
     .then(files => {
         const existingFiles = files.filter(Boolean);
         if(existingFiles.length) {
@@ -90,21 +89,6 @@ function sendArchive(res, files) {
     .catch(error => {
         console.error(error);
         utils.displayError(req, res, utils.buildError(error.message), 404);
-    });
-}
-
-function checkFileExists(file) {
-    if(!file.id) return Promise.reject(new Error('Invalid file id.'));
-
-    return new Promise((resolve, reject) => {
-        file.path = path.join(os.tmpdir(), 'uploads', String(file.id));
-        fs.access(file.path, fs.constants.R_OK, error => {
-            if(error) {
-                reject(new Error('File has expired.'));
-                return;
-            }
-            resolve(file);
-        });
     });
 }
 

@@ -110,7 +110,7 @@ async function handleFiles(req, res) {
 
 async function handleFile(file, ip) {
     try {
-        const [shortAlias, longAlias] = await Promise.all([database.generateAlias('files', 'short'), database.generateAlias('files', 'long')]);
+        const [shortAlias, longAlias, revokeToken] = await Promise.all([database.generateToken('files', 'short_alias'), database.generateToken('files', 'long_alias'), database.generateToken('files', 'revoke_token')]);
         const id = await database.insertFile(ip, file.originalname, file.size, file.mimetype, shortAlias, longAlias);
         await moveToUpload(file.path, id);
         const expire = moment().add(1, 'days');
@@ -136,7 +136,8 @@ async function handleFile(file, ip) {
             link: {
                 short: `${SITE_ADDRESS}/${shortAlias}`,
                 long: `${SITE_ADDRESS}/${longAlias}`
-            }
+            },
+            revokeToken: revokeToken
         };
     } catch(error) {
         return utils.buildError(error.message);
