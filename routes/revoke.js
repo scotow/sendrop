@@ -20,12 +20,12 @@ router.all(/^\/(?:d|delete|r|revoke)\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\/
     .then(file => {
         fs.unlink(file.path, error => {
             if(error) {
-                console.error('Error while unlinking file (revoking).', error, file.path));
+                console.error('Error while unlinking file (revoking).', error, file.path);
                 utils.displayError(req, res, utils.buildError('An error has occured while deleting file.'), 400);
                 return;
             }
             utils.displayData(req, res, { status: 'success', message: 'The file has been successfully revoked.' }, 200);
-        }
+        });
     })
     .catch(error => utils.displayError(req, res, utils.buildError(error.message), 404));
 });
