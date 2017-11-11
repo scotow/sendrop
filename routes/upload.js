@@ -137,7 +137,10 @@ async function handleFile(file, ip) {
                 short: `${SITE_ADDRESS}/${shortAlias}`,
                 long: `${SITE_ADDRESS}/${longAlias}`
             },
-            revokeToken: revokeToken
+            revoke: {
+                token: revokeToken,
+                link: `${SITE_ADDRESS}/revoke/${shortAlias}/${revokeToken}`
+            }
         };
     } catch(error) {
         return utils.buildError(error.message);
