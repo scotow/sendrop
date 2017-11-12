@@ -43,10 +43,15 @@ router.get(/^\/(?:(a|archive|d|f|g|i|t|v|z)\/)?([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+)
                     sendArchive(res, file);
                     return;
                 default:
-                    res.download(file.path, file.name);
+                    res.download(file.path, file.name, error => filesDownloaded(error, file));
                     return;
             }
-            res.sendFile(file.path, { headers: { 'Content-Type': type, 'Content-Disposition': `inline; filename="${file.name}"` } });
+            res.sendFile(file.path, {
+                headers: {
+                    'Content-Type': type,
+                    'Content-Disposition': `inline; filename="${file.name}"`
+                }
+            }, error => filesDownloaded(error, file));
         })
         .catch(error => utils.displayError(req, res, utils.buildError(error.message), 404));
     }
@@ -82,14 +87,24 @@ function sendArchive(res, files) {
     archive.createZip(files)
     .then(archivePath => {
         res.download(archivePath, 'files.zip', error => {
-            error && console.error('Error while uploading archive.', error, archivePath);
+            filesDownloaded(error, files);
             fs.unlink(archivePath, error => error && console.error('Error while unlinking archive file.', error, archivePath));
         });
     })
     .catch(error => {
-        console.error(error);
         utils.displayError(req, res, utils.buildError(error.message), 404);
     });
+}
+
+function filesDownloaded(error, files) {
+    if(error) {
+        console.error('Error while uploading archive.', error, archivePath);
+        return;
+    }
+
+    if(!Array.isArray(files)) files = [files];
+    database.filesDownloaded(files.map(file => file.id))
+    .catch(error => console.error('Error while updating files download count.', error));
 }
 
 module.exports = router;
