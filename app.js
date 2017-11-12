@@ -17,6 +17,7 @@ const express = require('express');
 const download = require('./routes/download.js');
 const upload = require('./routes/upload.js');
 const revoke = require('./routes/revoke.js');
+const info = require('./routes/info.js');
 const utils = require('./lib/utils.js');
 const error = require('./lib/error.js');
 
@@ -32,6 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', download);
 app.use('/', upload);
 app.use('/', revoke);
+app.use('/', info);
 
 app.all('*', (req, res) => {
     utils.displayError(req, res, error.fromCode(404));

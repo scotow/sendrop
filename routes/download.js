@@ -87,23 +87,18 @@ function sendArchive(res, files) {
     archive.createZip(files)
     .then(archivePath => {
         res.download(archivePath, 'files.zip', error => {
-            if(error) {
-                console.error('Error while uploading archive.', error, archivePath);
-                return;
-            }
-            filesDownloaded(files);
+            filesDownloaded(error, files);
             fs.unlink(archivePath, error => error && console.error('Error while unlinking archive file.', error, archivePath));
         });
     })
     .catch(error => {
-        console.error(error);
         utils.displayError(req, res, utils.buildError(error.message), 404);
     });
 }
 
 function filesDownloaded(error, files) {
     if(error) {
-        console.error('Error while uploading single file.', error);
+        console.error('Error while uploading archive.', error, archivePath);
         return;
     }
 

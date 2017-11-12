@@ -1,3 +1,6 @@
+// Setup.
+const SITE_ADDRESS = process.env.ADDR || (process.env.DEV ? 'https://dev.file.scotow.com' : 'https://file.scotow.com');
+
 // Imports.
 const fs = require('fs');
 
@@ -14,37 +17,46 @@ const router = require('express').Router();
 
 router.all(/^\/info\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
     const alias = req.params[0];
-    database.getInfo(alias)
+    database.getFileInfo(alias)
     .then(file => {
-        res.json(file);
-        return;
-        const info = {
+        const creation = moment(file.creation);
+        const expiration = moment(file.expiration);
+        if(!creation.isValid() || !expiration.isValid()) {
+            utils.displayError(req, res, utils.buildError('Invalid creation of expiration date.'), 400);
+            return;
+        }
+
+        utils.displayData(req, res, {
             status: 'success',
             info: {
                 name: file.name,
                 size: {
                     bytes: file.size,
                     readable: bytes(file.size)
-                }
+                },
+                link: `${SITE_ADDRESS}/info/${file.short_alias}`
+            },
+            creation: {
+                timestamp: creation.unix(),
+                date: creation.toISOString()
             },
             expire: {
-                timestamp: expire.unix(),
-                date: expire.toISOString(),
-                remaining: expire.unix() - moment().unix()
+                expired: expiration <= moment(),
+                timestamp: expiration.unix(),
+                date: expiration.toISOString(),
+                remaining: expiration.unix() - moment().unix()
             },
             alias: {
-                short: shortAlias,
-                long: longAlias
+                short: file.short_alias,
+                long: file.long_alias
             },
             link: {
-                short: `${SITE_ADDRESS}/${shortAlias}`,
-                long: `${SITE_ADDRESS}/${longAlias}`
+                short: `${SITE_ADDRESS}/${file.short_alias}`,
+                long: `${SITE_ADDRESS}/${file.long_alias}`,
+                display: `${SITE_ADDRESS}/f/${file.short_alias}`
             },
-            revoke: {
-                token: revokeToken,
-                link: `${SITE_ADDRESS}/revoke/${shortAlias}/${revokeToken}`
-            }
-        }
+            downloads: file.downloads
+        });
     })
     .catch(error => utils.displayError(req, res, utils.buildError(error.message), 404));
 });

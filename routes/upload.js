@@ -122,7 +122,8 @@ async function handleFile(file, ip) {
                 size: {
                     bytes: file.size,
                     readable: bytes(file.size)
-                }
+                },
+                link: `${SITE_ADDRESS}/info/${shortAlias}`
             },
             expire: {
                 timestamp: expire.unix(),
@@ -135,7 +136,8 @@ async function handleFile(file, ip) {
             },
             link: {
                 short: `${SITE_ADDRESS}/${shortAlias}`,
-                long: `${SITE_ADDRESS}/${longAlias}`
+                long: `${SITE_ADDRESS}/${longAlias}`,
+                display: `${SITE_ADDRESS}/f/${shortAlias}`
             },
             revoke: {
                 token: revokeToken,
@@ -150,7 +152,7 @@ async function handleFile(file, ip) {
 async function handleArchive(files, ip) {
     try {
         const size = files.reduce((acc, cur) => acc + cur.info.size.bytes, 0);
-        const [shortAlias, longAlias] = await Promise.all([database.generateAlias('archives', 'short'), database.generateAlias('archives', 'long')]);
+        const [shortAlias, longAlias] = await Promise.all([database.generateToken('archives', 'short_alias'), database.generateToken('archives', 'long_alias')]);
         const id = await database.insertArchive(ip, size, shortAlias, longAlias);
         await Promise.all(files.map(file => database.addFileToArchive(id, file.id)));
         return {
