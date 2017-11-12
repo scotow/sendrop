@@ -37,14 +37,31 @@ app.all('*', (req, res) => {
     utils.displayError(req, res, error.fromCode(404));
 });
 
-fs.existsSync(path.join(os.tmpdir(), 'uploads')) || fs.mkdirSync(path.join(os.tmpdir(), 'uploads'));
-database.connect()
-.then((connection) => {
-    console.log(`Connected to mySQL server (${connection.threadId}).`);
-    app.listen(PORT, () => {
-        console.log(`Server started on port ${PORT}.`);
-    });
-})
-.catch((error) => {
-    console.error(`Error connecting to mySQL: ${error.stack}`);
-});
+start();
+
+async function start() {
+    try {
+        const connection = await database.connect();
+        console.log(`Connected to mySQL server (${connection.threadId}).`);
+        await initUploadsFolder();
+        app.listen(PORT, () => {
+            console.log(`Server started on port ${PORT}.`);
+        });
+    } catch(error) {
+        console.error(`Error starting sandrop: ${error.stack}`);
+    }
+}
+
+async function initUploadsFolder() {
+    const UPLOAD_PATH = path.join(os.tmpdir(), 'uploads');
+    if(fs.existsSync(UPLOAD_PATH)) {
+        const fileRegex = /^\d+$/;
+        const files = fs.readdirSync(UPLOAD_PATH).filter(file => fileRegex.test(file));
+        if(files.length) {
+            const filesToDelete = (await database.shouldBeDelete(files));
+            filesToDelete.forEach(file => fs.unlinkSync(path.join(UPLOAD_PATH, String(file.id))));
+        }
+    } else {
+        fs.mkdirSync(UPLOAD_PATH);
+    }
+}
