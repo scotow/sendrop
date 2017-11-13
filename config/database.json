@@ -1,11 +1,17 @@
 {
-    "prod": {
+    "production": {
         "host"    : "localhost",
         "user"    : "file",
         "password": "lkX438A2sGiObnvp",
         "database": "file"
     },
     "dev": {
+        "host"    : "localhost",
+        "user"    : "file",
+        "password": "lkX438A2sGiObnvp",
+        "database": "file"
+    },
+    "lille1": {
         "host"    : "webtp.fil.univ-lille1.fr",
         "user"    : "lopez",
         "password": "xxJ349Qn22RVbWmF6hMbCMapL9xDJjcQ5C2xeP3Vr",

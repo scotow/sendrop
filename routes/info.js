@@ -1,7 +1,7 @@
-// Setup.
-const SITE_ADDRESS = process.env.ADDR || (process.env.DEV ? 'https://dev.file.scotow.com' : 'https://file.scotow.com');
+// Config.
+const config = require('../lib/config.js');
 
-// Imports.
+// Basic modules.
 const fs = require('fs');
 
 // Utils.
@@ -35,7 +35,7 @@ router.all(/^\/info\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
                     readable: bytes(file.size)
                 },
                 type: file.type,
-                link: `${SITE_ADDRESS}/info/${file.short_alias}`
+                link: `${config.site.address}/info/${file.short_alias}`
             },
             creation: {
                 timestamp: creation.unix(),
@@ -52,9 +52,9 @@ router.all(/^\/info\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
                 long: file.long_alias
             },
             link: {
-                short: `${SITE_ADDRESS}/${file.short_alias}`,
-                long: `${SITE_ADDRESS}/${file.long_alias}`,
-                display: `${SITE_ADDRESS}/f/${file.short_alias}`
+                short: `${config.site.address}/${file.short_alias}`,
+                long: `${config.site.address}/${file.long_alias}`,
+                display: `${config.site.address}/f/${file.short_alias}`
             },
             downloads: file.downloads
         });

@@ -1,5 +1,5 @@
-// Setup.
-const SITE_ADDRESS = process.env.ADDR || (process.env.DEV ? 'https://dev.file.scotow.com' : 'https://file.scotow.com');
+// Config.
+const config = require('../lib/config.js');
 
 // Imports.
 // Basic modules.
@@ -125,7 +125,7 @@ async function handleFile(file, ip) {
                     readable: bytes(file.size)
                 },
                 type: file.mimetype,
-                link: `${SITE_ADDRESS}/info/${shortAlias}`
+                link: `${config.site.address}/info/${shortAlias}`
             },
             expiration: {
                 timestamp: expiration.unix(),
@@ -137,13 +137,13 @@ async function handleFile(file, ip) {
                 long: longAlias
             },
             link: {
-                short: `${SITE_ADDRESS}/${shortAlias}`,
-                long: `${SITE_ADDRESS}/${longAlias}`,
-                display: `${SITE_ADDRESS}/f/${shortAlias}`
+                short: `${config.site.address}/${shortAlias}`,
+                long: `${config.site.address}/${longAlias}`,
+                display: `${config.site.address}/f/${shortAlias}`
             },
             revoke: {
                 token: revokeToken,
-                link: `${SITE_ADDRESS}/revoke/${shortAlias}/${revokeToken}`
+                link: `${config.site.address}/revoke/${shortAlias}/${revokeToken}`
             }
         };
     } catch(error) {
@@ -170,8 +170,8 @@ async function handleArchive(files, ip) {
                 long: longAlias
             },
             link: {
-                short: `${SITE_ADDRESS}/a/${shortAlias}`,
-                long: `${SITE_ADDRESS}/a/${longAlias}`
+                short: `${config.site.address}/a/${shortAlias}`,
+                long: `${config.site.address}/a/${longAlias}`
             }
         }
     } catch(error) {

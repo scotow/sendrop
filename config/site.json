@@ -1,0 +1,14 @@
+{
+    "production": {
+        "address": "https://file.scotow.com",
+        "port": 4003
+    },
+    "dev": {
+        "address": "https://dev.file.scotow.com",
+        "port": 5003
+    },
+    "lille1": {
+        "address": "http://localhost",
+        "port": 5003
+    }
+}

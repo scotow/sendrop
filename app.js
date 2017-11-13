@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 
-// Setup.
-const PORT = process.env.PORT || (process.env.DEV ? 5003 : 4003);
-
 // Imports.
+// Config.
+const config = require('./lib/config.js');
+
 // Basic modules.
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+
+// Utils.
+const moment = require('moment');
 
 // Database.
 const database = require('./lib/database.js');
@@ -46,8 +49,8 @@ async function start() {
         const connection = await database.connect();
         console.log(`Connected to mySQL server (${connection.threadId}).`);
         await initUploadsFolder();
-        app.listen(PORT, () => {
-            console.log(`Server started on port ${PORT}.`);
+        app.listen(config.site.port, () => {
+            console.log(`Server started on port ${config.site.port}.`);
         });
     } catch(error) {
         console.error(`Error starting sandrop: ${error.stack}`);
@@ -55,15 +58,23 @@ async function start() {
 }
 
 async function initUploadsFolder() {
-    const UPLOAD_PATH = path.join(os.tmpdir(), 'uploads');
-    if(fs.existsSync(UPLOAD_PATH)) {
+    if(fs.existsSync(config.storage.path)) {
         const fileRegex = /^\d+$/;
-        const files = fs.readdirSync(UPLOAD_PATH).filter(file => fileRegex.test(file));
+        let files = fs.readdirSync(config.storage.path).filter(file => fileRegex.test(file));
         if(files.length) {
-            const filesToDelete = (await database.shouldBeDelete(files));
-            filesToDelete.forEach(file => fs.unlinkSync(path.join(UPLOAD_PATH, String(file.id))));
+            const now = moment().unix();
+            files = await database.getExpiration(files);
+            files.forEach(file => {
+                if(file.expiration < now) {
+                    utils.deleteFile(file).catch(error => console.error('Error while deleting expired file on start-up.', error));
+                } else {
+                    setTimeout(() => {
+                        utils.deleteFile(file).catch(error => console.error('Error while deleting expired file.', error));
+                    }, (file.expiration - now) * 1e3);
+                }
+            });
         }
     } else {
-        fs.mkdirSync(UPLOAD_PATH);
+        fs.mkdirSync(config.storage.path);
     }
 }
