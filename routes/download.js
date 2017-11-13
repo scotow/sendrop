@@ -17,7 +17,7 @@ router.get(/^\/(?:(a|archive|f|g|i|t|v|z)\/)?([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2
     const shortcut = req.params[0];
     const alias = req.params[1];
     if(shortcut === 'a' || shortcut === 'archive') {
-        prepareArchive(res, alias);
+        prepareArchive(req, res, alias);
     } else {
         database.getFile(alias)
         .then(utils.checkFileExists)
@@ -40,7 +40,7 @@ router.get(/^\/(?:(a|archive|f|g|i|t|v|z)\/)?([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2
                     type = 'video';
                     break;
                 case 'z':
-                    sendArchive(res, file);
+                    sendArchive(req, res, file);
                     return;
                 default:
                     res.download(file.path, file.name, error => filesDownloaded(error, file));
@@ -61,7 +61,7 @@ router.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a
     Promise.all(req.params[0].split('+').map(alias => database.getFile(alias).then(utils.checkFileExists)))
     .then(files => {
         if(files.length) {
-            sendArchive(res, files);
+            sendArchive(req, res, files);
         } else {
             utils.displayError(req, res, utils.buildError('An error has occured while fetching your file(s).'), 404);
         }
@@ -69,13 +69,13 @@ router.get(/^\/((?:[a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})(?:\+(?:[a-zA-Z0-9]{6}|[a
     .catch(error => utils.displayError(req, res, utils.buildError(error.message), 404));
 });
 
-function prepareArchive(res, alias) {
+function prepareArchive(req, res, alias) {
     database.getArchiveFiles(alias)
     .then(files => Promise.all(files.map(file => utils.checkFileExists(file).catch(() => null))))
     .then(files => {
         const existingFiles = files.filter(Boolean);
         if(existingFiles.length) {
-            sendArchive(res, existingFiles);
+            sendArchive(req, res, existingFiles);
         } else {
             utils.displayError(req, res, utils.buildError('All files of this archive have expired.'), 404);
         }
@@ -83,7 +83,7 @@ function prepareArchive(res, alias) {
     .catch(error => utils.displayError(req, res, utils.buildError(error.message), 404));
 }
 
-function sendArchive(res, files) {
+function sendArchive(req, res, files) {
     archive.createZip(files)
     .then(archivePath => {
         res.download(archivePath, 'files.zip', error => {
