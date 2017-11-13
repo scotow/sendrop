@@ -110,10 +110,11 @@ async function handleFiles(req, res) {
 
 async function handleFile(file, ip) {
     try {
-        const expire = file.size < bytes('64MB') ? moment().add(1, 'days') : moment().add(6, 'hours');
+        const expiration = file.size < bytes('64MB') ? moment().add(1, 'days') : moment().add(6, 'hours');
         const [shortAlias, longAlias, revokeToken] = await Promise.all([database.generateToken('files', 'short_alias'), database.generateToken('files', 'long_alias'), database.generateToken('files', 'revoke_token')]);
-        const id = await database.insertFile(expire.unix(), ip, file.originalname, file.size, file.mimetype, shortAlias, longAlias, revokeToken);
+        const id = await database.insertFile(expiration.unix(), ip, file.originalname, file.size, file.mimetype, shortAlias, longAlias, revokeToken);
         await moveToUpload(file.path, id);
+        scheduleDeletion(id, expiration - moment());
         return {
             status: 'success',
             id: id,
@@ -123,12 +124,13 @@ async function handleFile(file, ip) {
                     bytes: file.size,
                     readable: bytes(file.size)
                 },
+                type: file.mimetype,
                 link: `${SITE_ADDRESS}/info/${shortAlias}`
             },
-            expire: {
-                timestamp: expire.unix(),
-                date: expire.toISOString(),
-                remaining: expire.unix() - moment().unix()
+            expiration: {
+                timestamp: expiration.unix(),
+                date: expiration.toISOString(),
+                remaining: expiration.unix() - moment().unix()
             },
             alias: {
                 short: shortAlias,
@@ -190,6 +192,19 @@ function moveToUpload(filePath, id) {
             resolve();
         });
     });
+}
+
+function scheduleDeletion(id, delay) {
+    setTimeout(() => {
+        const filePath = path.join(os.tmpdir(), 'uploads', String(id));
+        fs.access(filePath, fs.constants.F_OK, error => {
+            if(error) {
+                console.error('Error while deleting expired file. No access.', error);
+                return;
+            }
+            fs.unlink(filePath, error => error && console.error('Error while deleting expired file. Unlink impossible.', error));
+        });
+    }, delay);
 }
 
 module.exports = router;

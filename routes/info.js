@@ -34,6 +34,7 @@ router.all(/^\/info\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
                     bytes: file.size,
                     readable: bytes(file.size)
                 },
+                type: file.type,
                 link: `${SITE_ADDRESS}/info/${file.short_alias}`
             },
             creation: {
