@@ -13,7 +13,7 @@ html
             .ready-label= `Your file${files.length > 1 ? 's are' : ' is'} ready`
             each file in files
                 if file.status === 'success'
-                    .file.link.hint--top.hint--bounce(aria-label=`${file.info.name} - ${file.info.size.readable}\n\n${file.alias.long}\n\n${file.expire.date}`)
+                    .file.link.hint--top.hint--bounce(aria-label=`${file.info.name} - ${file.info.size.readable}\n\n${file.alias.long}\n\n${file.expiration.date}`)
                         input(id='f-' + file.alias.short type='text' readonly value=file.link.short)
                         a.action.download(href=file.link.short download)
                         .action.copy(data-clipboard-target='#f-' + file.alias.short)

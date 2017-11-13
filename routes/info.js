@@ -41,7 +41,7 @@ router.all(/^\/info\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
                 timestamp: creation.unix(),
                 date: creation.toISOString()
             },
-            expire: {
+            expiration: {
                 expired: expiration <= moment(),
                 timestamp: expiration.unix(),
                 date: expiration.toISOString(),
