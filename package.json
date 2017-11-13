@@ -1,0 +1,42 @@
+{
+  "name": "sandrop",
+  "version": "1.3.0",
+  "description": "Upload temporary files.",
+  "main": "app.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "sandrop": "./app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Scotow/sandhost.git"
+  },
+  "keywords": [
+    "file",
+    "hosting",
+    "temporary"
+  ],
+  "author": "Scotow",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Scotow/sandhost/issues"
+  },
+  "homepage": "https://github.com/Scotow/sandhost#readme",
+  "dependencies": {
+    "archiver": "^2.1.0",
+    "body-parser": "^1.18.2",
+    "bytes": "^3.0.0",
+    "diskusage": "^0.2.4",
+    "express": "^4.16.2",
+    "ip-regex": "^2.1.0",
+    "moment": "^2.19.1",
+    "multer": "^1.3.0",
+    "mysql": "^2.15.0",
+    "pug": "^2.0.0-rc.4"
+  }
+}
