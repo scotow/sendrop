@@ -10,6 +10,7 @@ const os = require('os');
 // Utils.
 const utils = require('../lib/utils.js');
 const moment = require('moment');
+const ms = require('ms');
 const bytes = require('bytes');
 const disk = require('../lib/disk.js');
 
@@ -94,25 +95,25 @@ async function handleFiles(req, res) {
         }
     });
 
-    files = (await Promise.all(filesToHandle.map(file => handleFile(file, req.ip)))).concat(unhandledFiles);
+    files = (await Promise.all(filesToHandle.map(file => handleFile(req, file)))).concat(unhandledFiles);
     const data = {files: files};
     const validFiles = files.filter(file => file.status === 'success');
     if(validFiles.length > 1) {
         data.archive = await handleArchive(validFiles, req.ip);
     }
     validFiles.forEach(file => delete file.id);
-    if(utils.booleanParamater(req.body.pretty)) {
+    if(utils.booleanParameter(req.body.pretty)) {
         res.render('links', data);
     } else {
         utils.displayData(req, res, singleFile ? data.files[0] : data, 200);
     }
 }
 
-async function handleFile(file, ip) {
+async function handleFile(req, file) {
     try {
-        const expiration = file.size < bytes('64MB') ? moment().add(1, 'days') : moment().add(6, 'hours');
+        const expiration = parseExpiration(req, file.size);
         const [shortAlias, longAlias, revokeToken] = await Promise.all([database.generateToken('files', 'short_alias'), database.generateToken('files', 'long_alias'), database.generateToken('files', 'revoke_token')]);
-        const id = await database.insertFile(expiration.unix(), ip, file.originalname, file.size, file.mimetype, shortAlias, longAlias, revokeToken);
+        const id = await database.insertFile(expiration.unix(), req.ip, file.originalname, file.size, file.mimetype, shortAlias, longAlias, revokeToken);
         await moveToUpload(file.path, id);
         scheduleDeletion(id, expiration - moment());
         return {
@@ -148,6 +149,22 @@ async function handleFile(file, ip) {
         };
     } catch(error) {
         return utils.buildError(error.message);
+    }
+}
+
+function parseExpiration(req, size) {
+    const maxExpiration = size < bytes('64MB') ? moment().add(1, 'days') : moment().add(6, 'hours');
+    let expirationRequested = utils.valueParameter(req, ['expiration', 'time', 'delay']);
+    if(expirationRequested) {
+        let expirationMs = ms(expirationRequested) * (/^\d+$/.test(expirationRequested) ? 1000 : 1);
+        if(expirationMs) {
+            expirationRequested = moment().add(expirationMs, 'milliseconds');
+            return maxExpiration < expirationRequested ? maxExpiration : expirationRequested;
+        } else {
+            return maxExpiration;
+        }
+    } else {
+        return maxExpiration;
     }
 }
 
