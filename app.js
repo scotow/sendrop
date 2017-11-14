@@ -46,8 +46,8 @@ start();
 
 async function start() {
     try {
-        const connection = await database.connect();
-        console.log(`Connected to mySQL server (${connection.threadId}).`);
+        await database.ping();
+        console.log(`Connected to mySQL server.`);
         await initUploadsFolder();
         app.listen(config.site.port, () => {
             console.log(`Server started on port ${config.site.port}.`);

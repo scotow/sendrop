@@ -1,6 +1,6 @@
 {
   "name": "sandrop",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Upload temporary files.",
   "main": "app.js",
   "directories": {
