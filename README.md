@@ -15,13 +15,13 @@ This package was developed using the following version and was not tested with p
 
 Feel free to check the [package.json](https://github.com/Scotow/sendrop/blob/master/package.json) file for more information.
 
-### Installation:
+### Installation
 
 Install the package using npm:
 
 `npm install -g sendrop`
 
-### Configuration:
+### Configuration
 
 Sendrop options can be either passed as environment variables or by updating the files in the [config](https://github.com/Scotow/sendrop/tree/master/config) folder.
 
