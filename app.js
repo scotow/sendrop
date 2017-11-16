@@ -53,7 +53,7 @@ async function start() {
             console.log(`Server started on port ${config.site.port}.`);
         });
     } catch(error) {
-        console.error(`Error starting sandrop: ${error.stack}`);
+        console.error(`Error starting Sendrop: ${error.stack}`);
     }
 }
 

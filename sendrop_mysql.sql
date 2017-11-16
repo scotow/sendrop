@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `archives` (
   `size` int(10) unsigned NOT NULL,
   `short_alias` varchar(63) NOT NULL,
   `long_alias` varchar(255) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=189 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `archive_files` (
   `archive_id` bigint(20) unsigned NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `files` (
   `long_alias` varchar(255) NOT NULL,
   `revoke_token` varchar(15) NOT NULL,
   `downloads` int(10) unsigned NOT NULL DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=2124 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
 
 ALTER TABLE `archives`

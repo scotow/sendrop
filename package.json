@@ -1,5 +1,5 @@
 {
-  "name": "sandrop",
+  "name": "sendrop",
   "version": "1.5.2",
   "description": "Upload temporary files.",
   "main": "app.js",
@@ -10,11 +10,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "sandrop": "./app.js"
+    "sendrop": "./app.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Scotow/sandrop.git"
+    "url": "git+https://github.com/Scotow/sendrop.git"
   },
   "keywords": [
     "file",
@@ -24,9 +24,9 @@
   "author": "Scotow",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Scotow/sandrop/issues"
+    "url": "https://github.com/Scotow/sendrop/issues"
   },
-  "homepage": "https://github.com/Scotow/sandrop#readme",
+  "homepage": "https://github.com/Scotow/sendrop#readme",
   "dependencies": {
     "archiver": "^2.1.0",
     "body-parser": "^1.18.2",
