@@ -7,7 +7,6 @@ const config = require('./lib/config.js');
 // Basic modules.
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
 
 // Utils.
 const moment = require('moment');
@@ -62,8 +61,8 @@ async function initUploadsFolder() {
         const fileRegex = /^\d+$/;
         let files = fs.readdirSync(config.storage.path).filter(file => fileRegex.test(file));
         if(files.length) {
-            const now = moment().unix();
             files = await database.getExpiration(files);
+            const now = moment().unix();
             files.forEach(file => {
                 if(file.expiration < now) {
                     utils.deleteFile(file).catch(error => console.error('Error while deleting expired file on start-up.', error));

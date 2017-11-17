@@ -1,6 +1,6 @@
 {
   "name": "sendrop",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Upload temporary files.",
   "main": "app.js",
   "directories": {

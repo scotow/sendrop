@@ -5,7 +5,6 @@ const config = require('../lib/config.js');
 // Basic modules.
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
 
 // Utils.
 const utils = require('../lib/utils.js');
@@ -25,14 +24,14 @@ const multer = require('multer');
 // Express midlewares.
 const uploadMidleware =
     multer({
-        dest: path.join(os.tmpdir(), 'uploads'),
+        dest: config.storage.path,
         limits: {
             fieldNameSize: 255
         }
     })
     .fields([
         { name: 'file', maxCount: 1 },
-        { name: 'files', maxCount: 32}
+        { name: 'files', maxCount: 32 }
     ]);
 
 
@@ -201,7 +200,7 @@ function moveToUpload(filePath, id) {
     if(!id) return Promise.reject(new Error('Invalid file id.'));
 
     return new Promise((resolve, reject) => {
-        fs.rename(filePath, path.join(os.tmpdir(), 'uploads', String(id)), error => {
+        fs.rename(filePath, path.join(config.storage.path, String(id)), error => {
             if(error) {
                 reject(new Error('Impossible to move the uploaded file.'));
                 return;
@@ -213,7 +212,7 @@ function moveToUpload(filePath, id) {
 
 function scheduleDeletion(id, delay) {
     setTimeout(() => {
-        const filePath = path.join(os.tmpdir(), 'uploads', String(id));
+        const filePath = path.join(config.storage.path, String(id));
         fs.access(filePath, fs.constants.F_OK, error => {
             if(error) {
                 console.error('Error while deleting expired file. No access.', error);
