@@ -44,8 +44,8 @@ router.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
 
         if(req.files) {
             handleFiles(req, res);
-        } else if(req.body.drop) {
-            utils.displayData(req, res, JSON.parse(req.body.drop));
+        } else if(req.body['drop-display']) {
+            utils.displayData(req, res, JSON.parse(req.body['drop-display']));
         } else {
             utils.displayError(req, res, utils.buildError('Invalid request.'), 404);
         }
@@ -101,11 +101,12 @@ async function handleFiles(req, res) {
         data.archive = await handleArchive(validFiles, req.ip);
     }
     validFiles.forEach(file => delete file.id);
-    if(utils.booleanParameter(req.body.pretty)) {
-        res.render('links', data);
-    } else {
-        utils.displayData(req, res, singleFile ? data.files[0] : data, 200);
-    }
+    utils.displayData(req, res, data);
+    // if(utils.isPretty(req) && !utils.hasFlag(req, 'drop')) {
+    //     res.render('links', data);
+    // } else {
+    //     utils.displayData(req, res, singleFile ? data.files[0] : data, 200);
+    // }
 }
 
 async function handleFile(req, file) {

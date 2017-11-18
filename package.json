@@ -1,6 +1,6 @@
 {
   "name": "sendrop",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "Upload temporary files.",
   "main": "app.js",
   "directories": {
@@ -31,6 +31,7 @@
     "archiver": "^2.1.0",
     "body-parser": "^1.18.2",
     "bytes": "^3.0.0",
+    "cookie-parser": "^1.4.3",
     "diskusage": "^0.2.4",
     "express": "^4.16.2",
     "ip-regex": "^2.1.0",

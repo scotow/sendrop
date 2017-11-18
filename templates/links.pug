@@ -4,10 +4,10 @@ html
         title= `File${files.length > 1 ? 's' : ''} Link${files.length > 1 ? 's' : ''} - Scotow`
         meta(name='viewport' content='width=device-width, initial-scale=1.0')
         link(rel='stylesheet' href='https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css')
-        link(rel='stylesheet' href='css/link/style.css')
+        link(rel='stylesheet' href='/css/link/style.css')
         script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
-        script(src='js/link/clipboard.min.js')
-        script(src='js/link/app.min.js')
+        script(src='/js/link/clipboard.min.js')
+        script(src='/js/link/app.min.js')
     body
         .files
             .ready-label= `Your file${files.length > 1 ? 's are' : ' is'} ready`

@@ -72,6 +72,7 @@ $(function() {
         for(var i = 0; i < droppedFiles.length; i++){
             data.append('files', droppedFiles[i]);
         }
+        data.append('drop-upload', '1');
 
         $icon.addClass('floating uploading');
         $fileName.text('');
@@ -83,10 +84,9 @@ $(function() {
 
         $.ajax({
             url: $form.attr('action'),
-            type: $form.attr('method'),
+            method: $form.attr('method'),
             data: data,
             dataType: 'text',
-            cache: false,
             contentType: false,
             processData: false,
             success: function(data) {
@@ -99,7 +99,7 @@ $(function() {
                 });
                 $('<input>', {
                     type: 'hidden',
-                    name: 'drop',
+                    name: 'drop-display',
                     value: data
                 }).appendTo($redirect);
                 $('<input>', {

@@ -4,9 +4,9 @@ html
     head
         title= code
         meta(name='viewport' content='width=device-width, initial-scale=1.0')
-        link(rel='stylesheet' href='css/error/style.css')
+        link(rel='stylesheet' href='/css/error/style.css')
     body
         section
-            each number in code
+            each number in String(code)
                 div= number
             span= message

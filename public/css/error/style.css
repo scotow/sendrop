@@ -20,12 +20,7 @@ body {
 
 body::before {
     content: '';
-    height: 100%;
-}
-
-body::after {
-    content: '';
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -33,7 +28,12 @@ body::after {
     background: #15b154;
 }
 
-body::before, section {
+body::after {
+    content: '';
+    height: 100%;
+}
+
+body::after, section {
     display: inline-block;
     vertical-align: middle;
 }
