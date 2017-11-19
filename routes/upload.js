@@ -45,7 +45,7 @@ router.post('/', bodyParser.urlencoded({ extended: false }), (req, res) => {
         if(req.files) {
             handleFiles(req, res);
         } else if(req.body['drop-display']) {
-            utils.displayData(req, res, JSON.parse(req.body['drop-display']));
+            utils.displayFiles(req, res, JSON.parse(req.body['drop-display']));
         } else {
             utils.displayError(req, res, utils.buildError('Invalid request.'), 404);
         }
@@ -98,15 +98,10 @@ async function handleFiles(req, res) {
     const data = {files: files};
     const validFiles = files.filter(file => file.status === 'success');
     if(validFiles.length > 1) {
-        data.archive = await handleArchive(validFiles, req.ip);
+        data.archive = await handleArchive(req, validFiles);
     }
     validFiles.forEach(file => delete file.id);
-    utils.displayData(req, res, data);
-    // if(utils.isPretty(req) && !utils.hasFlag(req, 'drop')) {
-    //     res.render('links', data);
-    // } else {
-    //     utils.displayData(req, res, singleFile ? data.files[0] : data, 200);
-    // }
+    utils.displayFiles(req, res, singleFile ? data.files[0] : data);
 }
 
 async function handleFile(req, file) {
@@ -169,11 +164,11 @@ function parseExpiration(req, size) {
     }
 }
 
-async function handleArchive(files, ip) {
+async function handleArchive(req, files) {
     try {
         const size = files.reduce((acc, cur) => acc + cur.info.size.bytes, 0);
         const [shortAlias, longAlias] = await Promise.all([database.generateToken('archives', 'short_alias'), database.generateToken('archives', 'long_alias')]);
-        const id = await database.insertArchive(ip, size, shortAlias, longAlias);
+        const id = await database.insertArchive(req.ip, size, shortAlias, longAlias);
         await Promise.all(files.map(file => database.addFileToArchive(id, file.id)));
         const baseAddress = config.site.address === 'auto' ? `${req.protocol}://${req.hostname}` : config.site.address;
         return {
