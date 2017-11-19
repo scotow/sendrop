@@ -26,6 +26,7 @@ router.all(/^\/info\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
             return;
         }
 
+        const baseAddress = config.site.address === 'auto' ? `${req.protocol}://${req.hostname}` : config.site.address;
         utils.displayData(req, res, {
             status: 'success',
             info: {
@@ -35,7 +36,7 @@ router.all(/^\/info\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
                     readable: bytes(file.size)
                 },
                 type: file.type,
-                link: `${config.site.address}/info/${file.short_alias}`
+                link: `${baseAddress}/info/${file.short_alias}`
             },
             creation: {
                 timestamp: creation.unix(),
@@ -52,9 +53,9 @@ router.all(/^\/info\/([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2})$/, (req, res) => {
                 long: file.long_alias
             },
             link: {
-                short: `${config.site.address}/${file.short_alias}`,
-                long: `${config.site.address}/${file.long_alias}`,
-                display: `${config.site.address}/f/${file.short_alias}`
+                short: `${baseAddress}/${file.short_alias}`,
+                long: `${baseAddress}/${file.long_alias}`,
+                display: `${baseAddress}/f/${file.short_alias}`
             },
             downloads: file.downloads
         });

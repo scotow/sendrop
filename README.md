@@ -61,14 +61,22 @@ export DB_DATABASE=sendrop
 
 ###### Address and port
 
-Furthermore you can specify a custom [address and listening port](https://github.com/Scotow/sendrop/blob/master/config/site.json). The address is mainly use to generate direct link to file  and the port may be change if you run Sendrop behind a proxy (default address is *localhost* and port is *80*):
+Furthermore you can specify a custom [address and listening port](https://github.com/Scotow/sendrop/blob/master/config/site.json). The address is mainly use to generate direct link to file and the port may be change if you run Sendrop behind a proxy. Setting the address as *'auto'* makes Sendrop use *req.hostname* and *req.protocol* (default address is *auto* and port is *80*):
 
 ```bash
 export ADRESS=file.mysite.com
 export PORT=8080
 ```
 
-*NB:* If used behind a proxy don't forget to set the **X-Forwarded-For** HTTP header to the user IP. The IP is used to count and moderate file uploads from the same user.
+*NB:* If used behind a proxy don't forget to set the **X-Forwarded-For** HTTP header to use the user IP and set the **X-Forwarded-Proto** to pass the protocol to Express. The IP is used to count and moderate file uploads from the same user.
+
+Here is the three directives I set in my NGINX conf file:
+
+```nginx
+proxy_set_header Host $host;
+proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto  $scheme;
+```
 
 ###### Storage folder
 

@@ -116,6 +116,7 @@ async function handleFile(req, file) {
         const id = await database.insertFile(expiration.unix(), req.ip, file.originalname, file.size, file.mimetype, shortAlias, longAlias, revokeToken);
         await moveToUpload(file.path, id);
         scheduleDeletion(id, expiration - moment());
+        const baseAddress = config.site.address === 'auto' ? `${req.protocol}://${req.hostname}` : config.site.address;
         return {
             status: 'success',
             id: id,
@@ -126,7 +127,7 @@ async function handleFile(req, file) {
                     readable: bytes(file.size)
                 },
                 type: file.mimetype,
-                link: `${config.site.address}/info/${shortAlias}`
+                link: `${baseAddress}/info/${shortAlias}`
             },
             expiration: {
                 timestamp: expiration.unix(),
@@ -138,13 +139,13 @@ async function handleFile(req, file) {
                 long: longAlias
             },
             link: {
-                short: `${config.site.address}/${shortAlias}`,
-                long: `${config.site.address}/${longAlias}`,
-                display: `${config.site.address}/f/${shortAlias}`
+                short: `${baseAddress}/${shortAlias}`,
+                long: `${baseAddress}/${longAlias}`,
+                display: `${baseAddress}/f/${shortAlias}`
             },
             revoke: {
                 token: revokeToken,
-                link: `${config.site.address}/revoke/${shortAlias}/${revokeToken}`
+                link: `${baseAddress}/revoke/${shortAlias}/${revokeToken}`
             }
         };
     } catch(error) {
@@ -174,6 +175,7 @@ async function handleArchive(files, ip) {
         const [shortAlias, longAlias] = await Promise.all([database.generateToken('archives', 'short_alias'), database.generateToken('archives', 'long_alias')]);
         const id = await database.insertArchive(ip, size, shortAlias, longAlias);
         await Promise.all(files.map(file => database.addFileToArchive(id, file.id)));
+        const baseAddress = config.site.address === 'auto' ? `${req.protocol}://${req.hostname}` : config.site.address;
         return {
             status: 'success',
             info: {
@@ -187,8 +189,8 @@ async function handleArchive(files, ip) {
                 long: longAlias
             },
             link: {
-                short: `${config.site.address}/a/${shortAlias}`,
-                long: `${config.site.address}/a/${longAlias}`
+                short: `${baseAddress}/a/${shortAlias}`,
+                long: `${baseAddress}/a/${longAlias}`
             }
         }
     } catch(error) {
