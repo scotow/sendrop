@@ -12,9 +12,10 @@ $(function() {
     // Cookie.
     var prettyCookie = Cookies.get('pretty');
     var pretty = prettyCookie === undefined ? 1 : parseInt(prettyCookie);
+    Cookies.set('pretty', pretty, { expires: 365 });
     $pretty.prop('checked', pretty).change(function() {
         pretty = this.checked ? 1 : 0;
-        Cookies.set('pretty', pretty, {expires: 365});
+        Cookies.set('pretty', pretty, { expires: 365 });
     });
 
     $form.submit(function(event) {
