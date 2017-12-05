@@ -98,7 +98,7 @@ function sendArchive(req, res, files) {
 
 function filesDownloaded(error, files) {
     if(error) {
-        console.error('Error while uploading archive.', error, archivePath);
+        console.error('Error while uploading archive.', error, files);
         return;
     }
 
