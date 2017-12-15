@@ -102,6 +102,10 @@ export SENDROP_ENV=dev
 
 `sendrop`
 
+### Script
+
+Quickly upload files using the [upload.sh](https://github.com/Scotow/sendrop/blob/master/upload.sh) script.
+
 ### Contribution
 
 Feedback are appreciated. Feel free to open an issue or a pull request if needed.
