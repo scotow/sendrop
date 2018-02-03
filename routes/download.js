@@ -26,9 +26,10 @@ router.get(/^\/(?:(a|archive|f|g|i|t|v|z)\/)?([a-zA-Z0-9]{6}|[a-z]+(?:-[a-z]+){2
             switch(shortcut) {
                 case 'f':
                     type = file.type;
+                    if(type.startsWith('text/')) type += '; charset=utf-8';
                     break;
                 case 't':
-                    type = 'text/plain';
+                    type = 'text/plain; charset=utf-8';
                     break;
                 case 'i':
                     type = 'image';
