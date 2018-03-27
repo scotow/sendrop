@@ -24,7 +24,7 @@ if ($opts{'i'}) {
                 if (-f $_) {
                     push @files, $_;
                 } else {
-                    print "Cannot upload '$_'. Skipping.\n";
+                    print "Cannot upload '$_'. Skipping.", "\n";
                 }
             }
         }
@@ -49,7 +49,7 @@ sub read_stdin {
 
 sub upload {
     unless (@files) {
-        print 'No file to upload. Exiting.';
+        print 'No file to upload. Exiting.', "\n";
         exit 1;
     }
 
