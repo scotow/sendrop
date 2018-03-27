@@ -40,7 +40,7 @@ sub read_stdin {
 
     my $line;
     foreach $line( <STDIN> ) {
-        chomp $line;
+        # chomp $line;
         print $tmp $line;
     }
 
