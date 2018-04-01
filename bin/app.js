@@ -1,10 +1,19 @@
 // Modules.
 
 // Imports.
-const config = require('../lib/config');
+const config = require('../lib/config.js');
+const database = require('../lib/database.js');
 
 start();
 
 async function start() {
-    await config.load();
+    try {
+        // Load configuration.
+        await config.load();
+
+        // Open connection to database.
+        await database.open();
+    } catch (error) {
+        console.error(error.message);
+    }
 }
