@@ -13,6 +13,9 @@ async function start() {
 
         // Open connection to database.
         await database.open();
+
+        // Testing.
+        await database.session.open();
     } catch (error) {
         console.error(error.message);
     }
