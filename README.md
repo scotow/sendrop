@@ -19,7 +19,11 @@ Feel free to check the [package.json](https://github.com/Scotow/sendrop/blob/mas
 
 Clone the repo then install globaly using npm:
 
-`npm install -g sendrop`
+```sh
+git clone https://github.com/Scotow/sendrop
+cd sendrop
+npm install -g sendrop
+```
 
 ### Configuration
 
