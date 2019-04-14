@@ -50,7 +50,7 @@ Then, you can specify the profile to load using the `SENDROP_ENV` environment va
 export SENDROP_ENV=dev
 ```
 
-###### Database (mySQL)
+##### Database (mySQL)
 
 Before starting the web server you have to create a new database ([creation script](https://github.com/Scotow/sendrop/blob/master/sendrop_mysql.sql)) and specify your mySQL credentials.
 
@@ -63,7 +63,7 @@ export DB_PASSWORD=password
 export DB_DATABASE=sendrop
 ```
 
-###### Address and port
+##### Address and port
 
 Furthermore you can specify a custom [address and listening port](https://github.com/Scotow/sendrop/blob/master/config/site.json). The address is mainly use to generate direct link to file and the port may be change if you run Sendrop behind a proxy. Setting the address as *'auto'* makes Sendrop use *req.hostname* and *req.protocol* (default address is *auto* and port is *80*):
 
@@ -82,7 +82,7 @@ proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
 proxy_set_header X-Forwarded-Proto  $scheme;
 ```
 
-###### Storage folder
+##### Storage folder
 
 Finally, you can specify the directory where files will be temporary stored using the [config file](https://github.com/Scotow/sendrop/blob/master/config/storage.json) or the following environment variable (default is the *temporary directory of your OS + /uploads/*):
 
@@ -90,11 +90,21 @@ Finally, you can specify the directory where files will be temporary stored usin
 export STORAGE_PATH=/tmp/sendrop
 ```
 
+##### Additional proxy configuration
+
+If you have a proxy in front of your Sendrop instance, you may need to increase the allowed body size of the requests.
+
+For example, in NGINX you may change this limit as following:
+
+```nginx
+client_max_body_size 256M;
+```
+
 **Feel free to check template files in the [config](https://github.com/Scotow/sendrop/tree/master/config) folder.**
 
 ### Running
 
-###### *Optional*
+##### *Optional*
 
 Set a Sendrop profile by setting the SENDROP_ENV variable:
 
@@ -102,7 +112,7 @@ Set a Sendrop profile by setting the SENDROP_ENV variable:
 export SENDROP_ENV=dev
 ```
 
-###### Start the web server using the command:
+##### Start the web server using the command:
 
 `sendrop`
 
