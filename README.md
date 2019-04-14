@@ -11,13 +11,13 @@ This package was developed using the following version and was not tested with p
 
 * [Node.js](http://nodejs.org) >= 8.9.X
 * [Express](https://expressjs.com) >= 4.16.X
-* [mySQL](https://www.mysql.com) >= 14.14
+* [mySQL](https://www.mysql.com) >= 5.5.X
 
 Feel free to check the [package.json](https://github.com/Scotow/sendrop/blob/master/package.json) file for more information.
 
 ### Installation
 
-Install the package using npm:
+Clone the repo then install globaly using npm:
 
 `npm install -g sendrop`
 
