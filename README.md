@@ -68,7 +68,7 @@ export DB_DATABASE=sendrop
 Furthermore you can specify a custom [address and listening port](https://github.com/Scotow/sendrop/blob/master/config/site.json). The address is mainly use to generate direct link to file and the port may be change if you run Sendrop behind a proxy. Setting the address as *'auto'* makes Sendrop use *req.hostname* and *req.protocol* (default address is *auto* and port is *80*):
 
 ```bash
-export ADRESS=file.mysite.com
+export ADDRESS=file.mysite.com
 export PORT=8080
 ```
 
