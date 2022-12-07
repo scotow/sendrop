@@ -33,7 +33,7 @@
     "bytes": "^3.0.0",
     "cookie-parser": "^1.4.3",
     "diskusage": "^0.2.4",
-    "express": "^4.16.2",
+    "express": "^4.17.3",
     "ip-regex": "^2.1.0",
     "moment": "^2.19.1",
     "ms": "^2.0.0",
